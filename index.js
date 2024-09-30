@@ -28,6 +28,12 @@ app.get('/api/persons', (request, response) => {
   response.json(data)
 })
 
+app.get('/api/person/:id', (request, response) => {
+  const id = request.params.id
+  const personData = data.find(p => p.id === id)
+  response.json(personData)
+})
+
 app.get('/info', (request, response) => {
   const now = Date.now()
   const today = new Date(now)
