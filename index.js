@@ -6,7 +6,17 @@ const morgan = require('morgan')
 // into JavaScript object which then attached into request.body
 app.use(express.json())
 
-app.use(morgan('tiny'))
+morgan.token('body', (request, response) => {
+  return JSON.stringify(request.body)
+})
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body', {
+  skip: (request, response) => { return request.method !== 'POST' }
+}))
+
+app.use(morgan('tiny', {
+  skip: (request, response) => { return request.method === 'POST' }
+}))
 
 let data = [
   { 
