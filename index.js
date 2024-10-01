@@ -1,3 +1,13 @@
+const express = require('express')
+const app = express()
+const morgan = require('morgan')
+
+// express.json() is important to convert JSON (request data)
+// into JavaScript object which then attached into request.body
+app.use(express.json())
+
+app.use(morgan('tiny'))
+
 let data = [
   { 
     "id": "1",
@@ -21,15 +31,8 @@ let data = [
   }
 ]
 
-const express = require('express')
-const app = express()
-
-// Important to convert JSON into JavaScript object 
-// to then, be attached into request.body
-app.use(express.json())
-
 const getId = () => {
-  return Math.floor(Math.random() * 1000000)
+  return String(Math.floor(Math.random() * 1000000))
 }
 
 app.get('/api/persons', (request, response) => {
