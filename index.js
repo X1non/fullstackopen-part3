@@ -1,10 +1,13 @@
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
+const cors = require('cors')
 
 // express.json() is important to convert JSON (request data)
 // into JavaScript object which then attached into request.body
 app.use(express.json())
+
+app.use(cors())
 
 morgan.token('body', (request, response) => {
   return JSON.stringify(request.body)
@@ -49,7 +52,7 @@ app.get('/api/persons', (request, response) => {
   response.json(data)
 })
 
-app.get('/api/person/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response) => {
   const id = request.params.id
   const personData = data.find(p => p.id === id)
   
@@ -108,7 +111,7 @@ app.post('/api/persons', (request, response) => {
 
 })
 
-app.delete('/api/person/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response) => {
   const id = request.params.id
   data = data.filter(p => p.id !== id)
   response.status(204).end()
