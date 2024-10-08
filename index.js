@@ -2,12 +2,17 @@ const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const path = require('path')
 
 // express.json() is important to convert JSON (request data)
 // into JavaScript object which then attached into request.body
 app.use(express.json())
 
 app.use(cors())
+
+app.use(express.static(path.join(__dirname, 'dist')))
+
+console.log(__dirname)
 
 morgan.token('body', (request, response) => {
   return JSON.stringify(request.body)
