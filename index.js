@@ -12,8 +12,6 @@ app.use(cors())
 
 app.use(express.static(path.join(__dirname, 'dist')))
 
-console.log(__dirname)
-
 morgan.token('body', (request, response) => {
   return JSON.stringify(request.body)
 })
