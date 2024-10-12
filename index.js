@@ -26,10 +26,6 @@ app.use(morgan('tiny', {
   skip: (request, response) => { return request.method === 'POST' }
 }))
 
-const getId = () => {
-  return String(Math.floor(Math.random() * 1000000))
-}
-
 app.get('/api/persons', (request, response) => {
   Person.find({}).then((people) => {
     response.json(people)
@@ -37,14 +33,9 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  const personData = data.find(p => p.id === id)
-  
-  if (personData) {
-    response.json(personData)
-  } else {
-    response.status(404).end()
-  }
+  Person.findById(request.params.id).then((person) => {
+    response.json(person)
+  })
 })
 
 app.get('/info', (request, response) => {
@@ -60,7 +51,7 @@ app.get('/info', (request, response) => {
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
-  if (!body) {
+  if (Object.keys(body).length === 0) {
     return response.status(400).json({
       error: 'entry data missing'
     })
@@ -78,20 +69,14 @@ app.post('/api/persons', (request, response) => {
     })
   }
   
-  if (data.find(p => p.name === body.name)) {
-    return response.status(400).json({
-      error: 'name must be unique'
-    })
-  }
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  })
 
-  const newPerson = {
-    "id": getId(),
-    "name": body.name,
-    "number": body.number
-  }
-
-  data = data.concat(newPerson)
-  response.json(data)
+  person.save().then((savedPerson) => {
+    response.json(savedPerson)
+  })
 
 })
 
