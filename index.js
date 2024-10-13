@@ -4,7 +4,6 @@ const morgan = require('morgan')
 const cors = require('cors')
 const path = require('path')
 const Person = require('./models/person')
-require('dotenv').config()
 
 // express.json() is important to convert JSON (request data)
 // into JavaScript object which then attached into request.body
@@ -32,9 +31,15 @@ app.get('/api/persons', (request, response) => {
   })
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id).then((person) => {
-    response.json(person)
+    if (person) {
+      response.json(person)
+    } else {
+      response.status(404).end()
+    }
+  }).catch((error) => {
+    next(error)
   })
 })
 
@@ -42,10 +47,12 @@ app.get('/info', (request, response) => {
   const now = Date.now()
   const today = new Date(now)
 
-  response.send(
-    `<p>Phonebook has info for ${data.length} people</p>
-    <p>${today.toString()}<p>`
-  )
+  Person.countDocuments({}).then((count) => {
+    response.send(
+      `<p>Phonebook has info for ${count} people</p>
+      <p>${today.toString()}<p>`
+    )
+  })
 })
 
 app.post('/api/persons', (request, response) => {
@@ -80,13 +87,29 @@ app.post('/api/persons', (request, response) => {
 
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  data = data.filter(p => p.id !== id)
-  response.status(204).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id).then((result) => {
+    response.status(204).end()
+  }).catch((error) => {
+    next(error)
+  })
 })
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+const errorHandler = (error, request, response, next) => {
+  console.log(error.message)
+
+  // Ini juga kayaknya errornya masih terlalu sparse/longgar
+  // Kayak bisa aja ada error lain di luar id yang menyebabkan casting error (?)
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error) 
+}
+
+app.use(errorHandler)
