@@ -13,16 +13,16 @@ app.use(cors())
 
 app.use(express.static(path.join(__dirname, 'dist')))
 
-morgan.token('body', (request, response) => {
+morgan.token('body', (request) => {
   return JSON.stringify(request.body)
 })
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body', {
-  skip: (request, response) => { return request.method !== 'POST' }
+  skip: (request) => { return request.method !== 'POST' }
 }))
 
 app.use(morgan('tiny', {
-  skip: (request, response) => { return request.method === 'POST' }
+  skip: (request) => { return request.method === 'POST' }
 }))
 
 app.get('/api/persons', (request, response) => {
@@ -57,7 +57,7 @@ app.get('/info', (request, response) => {
 
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
-  
+
   const person = new Person({
     name: body.name,
     number: body.number
@@ -66,16 +66,14 @@ app.post('/api/persons', (request, response, next) => {
   person.save().then((savedPerson) => {
     response.json(savedPerson)
   })
-  .catch(error => next(error))
+    .catch(error => next(error))
 
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
   const { number } = request.body
 
-  Person.findByIdAndUpdate(request.params.id, 
-    { number }, 
-    { new: true, runValidators: true, context: 'query' })
+  Person.findByIdAndUpdate(request.params.id, { number }, { new: true, runValidators: true, context: 'query' })
     .then((updatedPerson) => {
       response.json(updatedPerson)
     }).catch((error) => {
@@ -84,7 +82,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-  Person.findByIdAndDelete(request.params.id).then((result) => {
+  Person.findByIdAndDelete(request.params.id).then(() => {
     response.status(204).end()
   }).catch((error) => {
     next(error)
@@ -107,7 +105,7 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: error.message })
   }
 
-  next(error) 
+  next(error)
 }
 
 app.use(errorHandler)
